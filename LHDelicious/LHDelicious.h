@@ -16,12 +16,15 @@ enum DELICIOUS_ERROR_CODES {
     LHDeliciousErrorTimeout,
     LHDeliciousErrorThrottled,
     LHDeliciousErrorInvalidCredentials,
+    LHDeliciousErrorBookmarkNotFound,
     LHDeliciousErrorEmptyResponse
 };
 
 typedef void(^LHDeliciousGenericBlock)(id);
 typedef void(^LHDeliciousStringBlock)(NSString *);
 typedef void(^LHDeliciousDateBlock)(NSDate *);
+typedef void(^LHDeliciousEmptyBlock)();
+typedef void(^LHDeliciousDictionaryBlock)();
 typedef void(^LHDeliciousSuccessBlock)(NSArray *, NSDictionary *);
 typedef void(^LHDeliciousErrorBlock)(NSError *);
 
@@ -61,9 +64,9 @@ typedef void(^LHDeliciousErrorBlock)(NSError *);
 #pragma mark Utility
 - (void)lastUpdateWithSuccess:(LHDeliciousDateBlock)success failure:(LHDeliciousErrorBlock)failure;
 
-#pragma mark Posts
-- (void)postsWithSuccess:(LHDeliciousSuccessBlock)success failure:(LHDeliciousErrorBlock)failure;
-- (void)postsWithTags:(NSString *)tags
+#pragma mark Bookmarks
+- (void)bookmarksWithSuccess:(LHDeliciousSuccessBlock)success failure:(LHDeliciousErrorBlock)failure;
+- (void)bookmarksWithTags:(NSString *)tags
                offset:(NSInteger)offset
                 count:(NSInteger)count
              fromDate:(NSDate *)fromDate
@@ -71,5 +74,31 @@ typedef void(^LHDeliciousErrorBlock)(NSError *);
           includeMeta:(BOOL)includeMeta
               success:(LHDeliciousSuccessBlock)success
               failure:(LHDeliciousErrorBlock)failure;
+
+- (void)addBookmark:(NSDictionary *)bookmark
+            success:(void (^)())success
+            failure:(void (^)(NSError *))failure;
+
+- (void)addBookmarkWithURL:(NSString *)url
+                     title:(NSString *)title
+               description:(NSString *)description
+                      tags:(NSString *)tags
+                    shared:(BOOL)shared
+                    unread:(BOOL)unread
+                   success:(LHDeliciousEmptyBlock)success
+                   failure:(LHDeliciousErrorBlock)failure;
+
+- (void)bookmarkWithURL:(NSString *)url success:(LHDeliciousDictionaryBlock)success failure:(LHDeliciousErrorBlock)failure;
+- (void)deleteBookmarkWithURL:(NSString *)url success:(LHDeliciousEmptyBlock)success failure:(LHDeliciousErrorBlock)failure;
+
+#pragma mark Tags
+- (void)tagsWithSuccess:(LHDeliciousDictionaryBlock)success;
+- (void)deleteTag:(NSString *)tag success:(LHDeliciousEmptyBlock)success;
+- (void)renameTagFrom:(NSString *)oldTag to:(NSString *)newTag success:(LHDeliciousEmptyBlock)success;
+
+#pragma mark Tag bundles
+- (void)tagBundlesWithSuccess:(LHDeliciousDictionaryBlock)success;
+- (void)updateTagBundle:(NSString *)bundle withTags:(NSString *)tags success:(LHDeliciousEmptyBlock)success;
+- (void)deleteTagBundle:(NSString *)bundle success:(LHDeliciousEmptyBlock)success;
 
 @end

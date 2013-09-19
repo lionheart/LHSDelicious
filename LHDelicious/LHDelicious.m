@@ -41,8 +41,13 @@
         [self.dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'Z'"];
         [self.dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
         
+        // HTTP client
         self.httpClient = [AFHTTPClient clientWithBaseURL:[LHDelicious endpointURL]];
         //[self.httpClient registerHTTPOperationClass:[AFXMLRequestOperation class]];
+        
+        // XML parser settings
+        [[XMLDictionaryParser sharedInstance] setAlwaysUseArrays:YES];
+        [[XMLDictionaryParser sharedInstance] setAttributesMode:XMLDictionaryAttributesModeUnprefixed];
     }
     return self;
 }
@@ -126,15 +131,15 @@
     }];
 }
 
-#pragma mark Posts
+#pragma mark Bookmarks
 
 // Get all posts
-- (void)postsWithSuccess:(LHDeliciousSuccessBlock)success failure:(LHDeliciousErrorBlock)failure {
-    [self postsWithTags:nil offset:-1 count:-1 fromDate:nil toDate:nil includeMeta:YES success:success failure:failure];
+- (void)bookmarksWithSuccess:(LHDeliciousSuccessBlock)success failure:(LHDeliciousErrorBlock)failure {
+    [self bookmarksWithTags:nil offset:-1 count:-1 fromDate:nil toDate:nil includeMeta:YES success:success failure:failure];
 }
 
 // Get posts with optional tag filter, offset, result count, date range, and meta data
-- (void)postsWithTags:(NSString *)tags
+- (void)bookmarksWithTags:(NSString *)tags
                offset:(NSInteger)offset
                 count:(NSInteger)count
              fromDate:(NSDate *)fromDate
@@ -155,17 +160,110 @@
     // Start the request
     [self requestPath:@"posts/all" success:^(id response) {
         // Parse the XML data
-        [[XMLDictionaryParser sharedInstance] setAlwaysUseArrays:YES];
         NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
-        success([xml arrayValueForKeyPath:@"post"], nil);
+        success([xml arrayValueForKeyPath:@"post"], parameters);
     } failure:failure];
 }
 
 // Add a new bookmark
+- (void)addBookmark:(NSDictionary *)bookmark
+            success:(void (^)())success
+            failure:(void (^)(NSError *))failure {
+    [self requestPath:@"posts/add" parameters:bookmark success:^(id response) {
+        success();
+    } failure:failure];
+}
+
+// Add a new bookmark with options
+- (void)addBookmarkWithURL:(NSString *)url
+                     title:(NSString *)title
+               description:(NSString *)description
+                      tags:(NSString *)tags
+                   success:(LHDeliciousEmptyBlock)success
+                   failure:(LHDeliciousErrorBlock)failure {
+    NSDictionary *bookmark = @{
+                               @"url": url,
+                               @"description": title,
+                               @"extended": description,
+                               @"tags": tags,
+                               };
+    [self addBookmark:bookmark success:success failure:failure];
+}
+
+// Get a single bookmark
+- (void)bookmarkWithURL:(NSString *)url success:(LHDeliciousDictionaryBlock)success failure:(LHDeliciousErrorBlock)failure {
+    [self requestPath:@"posts/get" parameters:@{@"url": url} success:^(id response) {
+        if ([response[@"posts"] count] == 0) {
+            failure([NSError errorWithDomain:LHDeliciousErrorDomain code:LHDeliciousErrorBookmarkNotFound userInfo:nil]);
+        }
+        else {
+            NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
+            success([xml arrayValueForKeyPath:@"post"][0]);
+        }
+    } failure:failure];
+}
+
+// Delete bookmark
+- (void)deleteBookmarkWithURL:(NSString *)url success:(LHDeliciousEmptyBlock)success failure:(LHDeliciousErrorBlock)failure {
+    [self requestPath:@"posts/delete" parameters:@{@"url": url} success:^(id response) {
+        success();
+    } failure:failure];
+}
 
 #pragma mark Tags
 
+// Get all tags
+- (void)tagsWithSuccess:(LHDeliciousDictionaryBlock)success {
+    [self requestPath:@"tags/get" success:^(id response) {
+        NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
+        NSMutableDictionary *tagDict = [[NSMutableDictionary alloc] init];
+        for (NSDictionary *tag in [xml arrayValueForKeyPath:@"tag"]) {
+            [tagDict setValue:[tag valueForKey:@"count"] forKey:[tag valueForKeyPath:@"tag"]];
+        }
+        success(tagDict);
+    }];
+}
+
+// Delete a tag
+- (void)deleteTag:(NSString *)tag success:(LHDeliciousEmptyBlock)success {
+    [self requestPath:@"tags/delete" parameters:@{@"tag": tag} success:^(id response) {
+        success();
+    } failure:^(NSError *error) {}];
+}
+
+// Rename a tag
+- (void)renameTagFrom:(NSString *)oldTag to:(NSString *)newTag success:(LHDeliciousEmptyBlock)success {
+    [self requestPath:@"tags/rename" parameters:@{@"old": oldTag, @"new": newTag} success:^(id response) {
+        success();
+    } failure:^(NSError *error) {}];
+}
 
 #pragma mark Tag bundles
+
+// Get all tag bundles
+- (void)tagBundlesWithSuccess:(LHDeliciousDictionaryBlock)success {
+    [self requestPath:@"tags/bundles/all" success:^(id response) {
+        NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
+        NSMutableDictionary *tagDict = [[NSMutableDictionary alloc] init];
+        for (NSDictionary *tag in [xml arrayValueForKeyPath:@"tag"]) {
+            [tagDict setValue:[tag valueForKey:@"tags"] forKey:[tag valueForKeyPath:@"name"]];
+        }
+        success(tagDict);
+    }];
+}
+
+// Update a tag bundle
+- (void)updateTagBundle:(NSString *)bundle withTags:(NSString *)tags success:(LHDeliciousEmptyBlock)success {
+    [self requestPath:@"tags/bundles/set" parameters:@{@"bundle": bundle, @"tags": tags} success:^(id response) {
+        success();
+    } failure:^(NSError *error) {}];
+}
+
+// Delete a tag bundle
+- (void)deleteTagBundle:(NSString *)bundle success:(LHDeliciousEmptyBlock)success {
+    [self requestPath:@"tags/bundles/delete" parameters:@{@"bundle": bundle} success:^(id response) {
+        success();
+    } failure:^(NSError *error) {}];
+}
 
 @end
