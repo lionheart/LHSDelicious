@@ -41,8 +41,12 @@ typedef void(^LHDeliciousErrorBlock)(NSError *);
 @property (nonatomic, copy) void (^loginTimeoutCallback)();
 
 + (NSString *)urlEncode;
-+ (LHDelicious *)sharedInstance;
 + (NSURL *)endpointURL;
+
+/**
+ Creates and returns an `LHDelicious` object.
+ */
++ (LHDelicious *)sharedInstance;
 
 - (void)requestPath:(NSString *)path parameters:(NSDictionary *)parameters success:(LHDeliciousGenericBlock)success failure:(LHDeliciousErrorBlock)failure;
 - (void)requestPath:(NSString *)path success:(LHDeliciousGenericBlock)success failure:(LHDeliciousErrorBlock)failure;
@@ -61,7 +65,18 @@ typedef void(^LHDeliciousErrorBlock)(NSError *);
 
 #pragma mark - API functions
 
+///--------------------------------
+/// @name Primary API functionality
+///--------------------------------
+
 #pragma mark Utility
+
+/**
+ Retrieve the time bookmarks were last updated on the server.
+ 
+ @param success A block object to be executed when the request finishes successfully. This block has no return value and takes one argument: a date representing the time that bookmarks were last updated on the server.
+ @param failure A block object to be executed when the task finishes unsuccessfully, or that finishes successfully, but encountered an error while parsing the response data. This block has no return value and takes one argument: an error describing the network or parsing error that occurred.
+ */
 - (void)lastUpdateWithSuccess:(LHDeliciousDateBlock)success failure:(LHDeliciousErrorBlock)failure;
 
 #pragma mark Bookmarks
