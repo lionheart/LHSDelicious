@@ -81,14 +81,14 @@ typedef void(^LHDeliciousErrorBlock)(NSError *);
 
 #pragma mark Bookmarks
 - (void)bookmarksWithSuccess:(LHDeliciousSuccessBlock)success failure:(LHDeliciousErrorBlock)failure;
-- (void)bookmarksWithTags:(NSString *)tags
-               offset:(NSInteger)offset
-                count:(NSInteger)count
-             fromDate:(NSDate *)fromDate
-               toDate:(NSDate *)toDate
-          includeMeta:(BOOL)includeMeta
-              success:(LHDeliciousSuccessBlock)success
-              failure:(LHDeliciousErrorBlock)failure;
+- (void)bookmarksWithTag:(NSString *)tag
+                  offset:(NSInteger)offset
+                   count:(NSInteger)count
+                fromDate:(NSDate *)fromDate
+                  toDate:(NSDate *)toDate
+             includeMeta:(BOOL)includeMeta
+                 success:(LHDeliciousSuccessBlock)success
+                 failure:(LHDeliciousErrorBlock)failure;
 
 - (void)addBookmark:(NSDictionary *)bookmark
             success:(void (^)())success

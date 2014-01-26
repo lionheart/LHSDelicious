@@ -135,24 +135,24 @@
 
 // Get all posts
 - (void)bookmarksWithSuccess:(LHDeliciousSuccessBlock)success failure:(LHDeliciousErrorBlock)failure {
-    [self bookmarksWithTags:nil offset:-1 count:-1 fromDate:nil toDate:nil includeMeta:YES success:success failure:failure];
+    [self bookmarksWithTag:nil offset:-1 count:-1 fromDate:nil toDate:nil includeMeta:YES success:success failure:failure];
 }
 
 // Get posts with optional tag filter, offset, result count, date range, and meta data
-- (void)bookmarksWithTags:(NSString *)tags
-               offset:(NSInteger)offset
-                count:(NSInteger)count
-             fromDate:(NSDate *)fromDate
-               toDate:(NSDate *)toDate
-          includeMeta:(BOOL)includeMeta
-              success:(LHDeliciousSuccessBlock)success
-              failure:(LHDeliciousErrorBlock)failure {
+- (void)bookmarksWithTag:(NSString *)tag
+                  offset:(NSInteger)offset
+                   count:(NSInteger)count
+                fromDate:(NSDate *)fromDate
+                  toDate:(NSDate *)toDate
+             includeMeta:(BOOL)includeMeta
+                 success:(LHDeliciousSuccessBlock)success
+                 failure:(LHDeliciousErrorBlock)failure {
     
     // Build our paramters
     NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
-    if (tags) parameters[@"tags"] = tags;
-    if (offset != -1) parameters[@"start"] = [NSString stringWithFormat:@"%d", offset];
-    if (count != -1 ) parameters[@"results"] = [NSString stringWithFormat:@"%d", count];
+    if (tag) parameters[@"tag"] = tag;
+    if (offset != -1) parameters[@"start"] = [NSString stringWithFormat:@"%ld", (long)offset];
+    if (count != -1 ) parameters[@"results"] = [NSString stringWithFormat:@"%ld", (long)count];
     if (fromDate) parameters[@"fromdt"] = [self.dateFormatter stringFromDate:fromDate];
     if (toDate) parameters[@"todt"] = [self.dateFormatter stringFromDate:fromDate];
     if (includeMeta) parameters[@"meta"] = @"yes";
