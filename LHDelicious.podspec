@@ -8,5 +8,7 @@ Pod::Spec.new do |s|
 
   s.source_files = 'LHDelicious/*.{h,m}'
   s.requires_arc = true
+  s.dependency 'XMLDictionary', '~> 1.3'
+  s.dependency 'AFNetworking', '~> 1.3.2'
 end
 
