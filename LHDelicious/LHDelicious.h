@@ -52,16 +52,18 @@ typedef void(^LHDeliciousErrorBlock)(NSError *);
 - (void)requestPath:(NSString *)path success:(LHDeliciousGenericBlock)success failure:(LHDeliciousErrorBlock)failure;
 - (void)requestPath:(NSString *)path success:(LHDeliciousGenericBlock)success;
 
-- (void)authenticateWithUsername:(NSString *)user
-                        password:(NSString *)pass
+- (void)authenticateWithUsername:(NSString *)username
+                        password:(NSString *)password
                          timeout:(NSTimeInterval)timeout
                          success:(LHDeliciousStringBlock)success
                          failure:(LHDeliciousErrorBlock)failure;
 
-- (void)authenticateWithUsername:(NSString *)user
-                        password:(NSString *)pass
+- (void)authenticateWithUsername:(NSString *)username
+                        password:(NSString *)password
                          success:(LHDeliciousStringBlock)success
                          failure:(LHDeliciousErrorBlock)failure;
+
+- (void)resetAuthentication;
 
 #pragma mark - API functions
 

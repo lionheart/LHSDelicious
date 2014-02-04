@@ -12,10 +12,8 @@
 
 @implementation LHDelicious
 
-@synthesize username, password;
-@synthesize dateFormatter;
-@synthesize throttleTimer;
-@synthesize requestStartedCallback, requestCompletedCallback;
+@synthesize username = _username;
+@synthesize password = _password;
 
 + (LHDelicious *)sharedInstance {
     static LHDelicious *sharedInstance = nil;
@@ -105,10 +103,14 @@
 }
 
 #pragma mark Authentication
-- (void)authenticateWithUsername:(NSString *)user password:(NSString *)pass timeout:(NSTimeInterval)timeout success:(LHDeliciousStringBlock)success failure:(LHDeliciousErrorBlock)failure {
+- (void)authenticateWithUsername:(NSString *)username
+                        password:(NSString *)password
+                         timeout:(NSTimeInterval)timeout
+                         success:(LHDeliciousStringBlock)success
+                         failure:(LHDeliciousErrorBlock)failure {
     // Update our global username/password
-    self.username = user;
-    self.password = pass;
+    self.username = username;
+    self.password = password;
     
     // Delicious has no specific username check, so we check for a 200 OK on the last update time
     [self lastUpdateWithSuccess:^(NSDate *lastUpdate) {
@@ -116,6 +118,18 @@
     } failure:^(NSError *error) {
         failure([NSError errorWithDomain:LHDeliciousErrorDomain code:LHDeliciousErrorInvalidCredentials userInfo:nil]);
     }];
+}
+
+- (void)authenticateWithUsername:(NSString *)user
+                        password:(NSString *)pass
+                         success:(LHDeliciousStringBlock)success
+                         failure:(LHDeliciousErrorBlock)failure {
+    [self authenticateWithUsername:user password:pass timeout:30 success:success failure:failure];
+}
+
+- (void)resetAuthentication {
+    self.username = nil;
+    self.password = nil;
 }
 
 #pragma mark - API methods
@@ -158,7 +172,7 @@
     if (includeMeta) parameters[@"meta"] = @"yes";
     
     // Start the request
-    [self requestPath:@"posts/all" success:^(id response) {
+    [self requestPath:@"posts/all" parameters:parameters success:^(id response) {
         // Parse the XML data
         NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
         success([xml arrayValueForKeyPath:@"post"], parameters);
@@ -186,7 +200,7 @@
                                @"description": title,
                                @"extended": description,
                                @"tags": tags,
-                               };
+                           };
     [self addBookmark:bookmark success:success failure:failure];
 }
 
