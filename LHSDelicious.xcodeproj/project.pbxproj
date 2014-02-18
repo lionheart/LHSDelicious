@@ -55,7 +55,7 @@
 		E8168D2317EA322400366C2B = {
 			isa = PBXGroup;
 			children = (
-				E8168D3117EA322400366C2B /* LHDelicious */,
+				E8168D3117EA322400366C2B /* LHSDelicious */,
 				E8168D2E17EA322400366C2B /* Frameworks */,
 				E8168D2D17EA322400366C2B /* Products */,
 				C978900EBB994CFF92FE6D8D /* Pods.xcconfig */,
@@ -79,7 +79,7 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		E8168D3117EA322400366C2B /* LHDelicious */ = {
+		E8168D3117EA322400366C2B /* LHSDelicious */ = {
 			isa = PBXGroup;
 			children = (
 				E8168D3417EA322400366C2B /* LHSDelicious.h */,
@@ -88,7 +88,7 @@
 				E8168D3E17EA3DBC00366C2B /* NSString+URLEncoding.m */,
 				E8168D3217EA322400366C2B /* Supporting Files */,
 			);
-			path = LHDelicious;
+			path = LHSDelicious;
 			sourceTree = "<group>";
 		};
 		E8168D3217EA322400366C2B /* Supporting Files */ = {
