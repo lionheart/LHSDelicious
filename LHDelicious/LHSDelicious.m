@@ -1,25 +1,25 @@
 //
-//  LHDelicious.m
-//  LHDelicious
+//  LHSDelicious.m
+//  LHSDelicious
 //
 //  Created by Andy Muldowney on 9/18/13.
 //  Copyright (c) 2013 Lionheart Software. All rights reserved.
 //
 
-#import "LHDelicious.h"
+#import "LHSDelicious.h"
 #import "NSString+URLEncoding.h"
 #import <XMLDictionary/XMLDictionary.h>
 
-@implementation LHDelicious
+@implementation LHSDelicious
 
 @synthesize username = _username;
 @synthesize password = _password;
 
-+ (LHDelicious *)sharedInstance {
-    static LHDelicious *sharedInstance = nil;
++ (LHSDelicious *)sharedInstance {
+    static LHSDelicious *sharedInstance = nil;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        sharedInstance = [[LHDelicious alloc] init];
+        sharedInstance = [[LHSDelicious alloc] init];
     });
     return sharedInstance;
 }
@@ -40,7 +40,7 @@
         [self.dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
         
         // HTTP client
-        self.httpClient = [AFHTTPClient clientWithBaseURL:[LHDelicious endpointURL]];
+        self.httpClient = [AFHTTPClient clientWithBaseURL:[LHSDelicious endpointURL]];
         //[self.httpClient registerHTTPOperationClass:[AFXMLRequestOperation class]];
         
         // XML parser settings
@@ -51,7 +51,7 @@
 }
 
 #pragma mark Request wrappers
-- (void)requestPath:(NSString *)path parameters:(NSDictionary *)parameters success:(LHDeliciousGenericBlock)success failure:(LHDeliciousErrorBlock)failure {
+- (void)requestPath:(NSString *)path parameters:(NSDictionary *)parameters success:(LHSDeliciousGenericBlock)success failure:(LHSDeliciousErrorBlock)failure {
     
     // Initiate the request started callback
     self.requestStartedCallback();
@@ -84,9 +84,11 @@
     // Set the completion blocks
     [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
         success(responseObject);
+        self.requestCompletedCallback();
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         // TODO: Parse other errors here
-        failure([NSError errorWithDomain:LHDeliciousErrorDomain code:LHDeliciousErrorEmptyResponse userInfo:nil]);
+        failure([NSError errorWithDomain:LHSDeliciousErrorDomain code:LHSDeliciousErrorEmptyResponse userInfo:nil]);
+        self.requestCompletedCallback();
     }];
     
     // Start the request
@@ -94,11 +96,11 @@
     
 }
 
-- (void)requestPath:(NSString *)path success:(LHDeliciousGenericBlock)success failure:(LHDeliciousErrorBlock)failure {
+- (void)requestPath:(NSString *)path success:(LHSDeliciousGenericBlock)success failure:(LHSDeliciousErrorBlock)failure {
     [self requestPath:path parameters:nil success:success failure:failure];
 }
 
-- (void)requestPath:(NSString *)path success:(LHDeliciousGenericBlock)success {
+- (void)requestPath:(NSString *)path success:(LHSDeliciousGenericBlock)success {
     [self requestPath:path parameters:nil success:success failure:^(NSError *error){}];
 }
 
@@ -106,8 +108,8 @@
 - (void)authenticateWithUsername:(NSString *)username
                         password:(NSString *)password
                          timeout:(NSTimeInterval)timeout
-                         success:(LHDeliciousStringBlock)success
-                         failure:(LHDeliciousErrorBlock)failure {
+                         success:(LHSDeliciousStringBlock)success
+                         failure:(LHSDeliciousErrorBlock)failure {
     // Update our global username/password
     self.username = username;
     self.password = password;
@@ -116,14 +118,14 @@
     [self lastUpdateWithSuccess:^(NSDate *lastUpdate) {
         success(self.username);
     } failure:^(NSError *error) {
-        failure([NSError errorWithDomain:LHDeliciousErrorDomain code:LHDeliciousErrorInvalidCredentials userInfo:nil]);
+        failure([NSError errorWithDomain:LHSDeliciousErrorDomain code:LHSDeliciousErrorInvalidCredentials userInfo:nil]);
     }];
 }
 
 - (void)authenticateWithUsername:(NSString *)user
                         password:(NSString *)pass
-                         success:(LHDeliciousStringBlock)success
-                         failure:(LHDeliciousErrorBlock)failure {
+                         success:(LHSDeliciousStringBlock)success
+                         failure:(LHSDeliciousErrorBlock)failure {
     [self authenticateWithUsername:user password:pass timeout:30 success:success failure:failure];
 }
 
@@ -137,7 +139,7 @@
 #pragma mark Utility
 
 // Get the NSDate of the last post update
-- (void)lastUpdateWithSuccess:(LHDeliciousDateBlock)success failure:(LHDeliciousErrorBlock)failure {
+- (void)lastUpdateWithSuccess:(LHSDeliciousDateBlock)success failure:(LHSDeliciousErrorBlock)failure {
     [self requestPath:@"posts/update" success:^(id response) {
         success([NSDate date]);
     } failure:^(NSError *error) {
@@ -148,7 +150,7 @@
 #pragma mark Bookmarks
 
 // Get all posts
-- (void)bookmarksWithSuccess:(LHDeliciousSuccessBlock)success failure:(LHDeliciousErrorBlock)failure {
+- (void)bookmarksWithSuccess:(LHSDeliciousSuccessBlock)success failure:(LHSDeliciousErrorBlock)failure {
     [self bookmarksWithTag:nil offset:-1 count:-1 fromDate:nil toDate:nil includeMeta:YES success:success failure:failure];
 }
 
@@ -159,8 +161,8 @@
                 fromDate:(NSDate *)fromDate
                   toDate:(NSDate *)toDate
              includeMeta:(BOOL)includeMeta
-                 success:(LHDeliciousSuccessBlock)success
-                 failure:(LHDeliciousErrorBlock)failure {
+                 success:(LHSDeliciousSuccessBlock)success
+                 failure:(LHSDeliciousErrorBlock)failure {
     
     // Build our paramters
     NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
@@ -193,22 +195,24 @@
                      title:(NSString *)title
                description:(NSString *)description
                       tags:(NSString *)tags
-                   success:(LHDeliciousEmptyBlock)success
-                   failure:(LHDeliciousErrorBlock)failure {
+                    shared:(BOOL)shared
+                   success:(LHSDeliciousEmptyBlock)success
+                   failure:(LHSDeliciousErrorBlock)failure {
     NSDictionary *bookmark = @{
                                @"url": url,
                                @"description": title,
                                @"extended": description,
+                               @"shared": shared ? @"yes" : @"no",
                                @"tags": tags,
                            };
     [self addBookmark:bookmark success:success failure:failure];
 }
 
 // Get a single bookmark
-- (void)bookmarkWithURL:(NSString *)url success:(LHDeliciousDictionaryBlock)success failure:(LHDeliciousErrorBlock)failure {
+- (void)bookmarkWithURL:(NSString *)url success:(LHSDeliciousDictionaryBlock)success failure:(LHSDeliciousErrorBlock)failure {
     [self requestPath:@"posts/get" parameters:@{@"url": url} success:^(id response) {
         if ([response[@"posts"] count] == 0) {
-            failure([NSError errorWithDomain:LHDeliciousErrorDomain code:LHDeliciousErrorBookmarkNotFound userInfo:nil]);
+            failure([NSError errorWithDomain:LHSDeliciousErrorDomain code:LHSDeliciousErrorBookmarkNotFound userInfo:nil]);
         }
         else {
             NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
@@ -218,7 +222,7 @@
 }
 
 // Delete bookmark
-- (void)deleteBookmarkWithURL:(NSString *)url success:(LHDeliciousEmptyBlock)success failure:(LHDeliciousErrorBlock)failure {
+- (void)deleteBookmarkWithURL:(NSString *)url success:(LHSDeliciousEmptyBlock)success failure:(LHSDeliciousErrorBlock)failure {
     [self requestPath:@"posts/delete" parameters:@{@"url": url} success:^(id response) {
         success();
     } failure:failure];
@@ -227,7 +231,7 @@
 #pragma mark Tags
 
 // Get all tags
-- (void)tagsWithSuccess:(LHDeliciousDictionaryBlock)success {
+- (void)tagsWithSuccess:(LHSDeliciousDictionaryBlock)success {
     [self requestPath:@"tags/get" success:^(id response) {
         NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
         NSMutableDictionary *tagDict = [[NSMutableDictionary alloc] init];
@@ -239,14 +243,14 @@
 }
 
 // Delete a tag
-- (void)deleteTag:(NSString *)tag success:(LHDeliciousEmptyBlock)success {
+- (void)deleteTag:(NSString *)tag success:(LHSDeliciousEmptyBlock)success {
     [self requestPath:@"tags/delete" parameters:@{@"tag": tag} success:^(id response) {
         success();
     } failure:^(NSError *error) {}];
 }
 
 // Rename a tag
-- (void)renameTagFrom:(NSString *)oldTag to:(NSString *)newTag success:(LHDeliciousEmptyBlock)success {
+- (void)renameTagFrom:(NSString *)oldTag to:(NSString *)newTag success:(LHSDeliciousEmptyBlock)success {
     [self requestPath:@"tags/rename" parameters:@{@"old": oldTag, @"new": newTag} success:^(id response) {
         success();
     } failure:^(NSError *error) {}];
@@ -255,7 +259,7 @@
 #pragma mark Tag bundles
 
 // Get all tag bundles
-- (void)tagBundlesWithSuccess:(LHDeliciousDictionaryBlock)success {
+- (void)tagBundlesWithSuccess:(LHSDeliciousDictionaryBlock)success {
     [self requestPath:@"tags/bundles/all" success:^(id response) {
         NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
         NSMutableDictionary *tagDict = [[NSMutableDictionary alloc] init];
@@ -267,14 +271,14 @@
 }
 
 // Update a tag bundle
-- (void)updateTagBundle:(NSString *)bundle withTags:(NSString *)tags success:(LHDeliciousEmptyBlock)success {
+- (void)updateTagBundle:(NSString *)bundle withTags:(NSString *)tags success:(LHSDeliciousEmptyBlock)success {
     [self requestPath:@"tags/bundles/set" parameters:@{@"bundle": bundle, @"tags": tags} success:^(id response) {
         success();
     } failure:^(NSError *error) {}];
 }
 
 // Delete a tag bundle
-- (void)deleteTagBundle:(NSString *)bundle success:(LHDeliciousEmptyBlock)success {
+- (void)deleteTagBundle:(NSString *)bundle success:(LHSDeliciousEmptyBlock)success {
     [self requestPath:@"tags/bundles/delete" parameters:@{@"bundle": bundle} success:^(id response) {
         success();
     } failure:^(NSError *error) {}];
