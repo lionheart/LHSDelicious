@@ -69,9 +69,6 @@
     
     if (!failure) failure = ^(NSError *error) {};
 
-    NSLog(@"%@", self.username);
-    NSLog(@"%@", self.password);
-
     self.credential = [NSURLCredential credentialWithUser:self.username
                                                  password:self.password
                                               persistence:NSURLCredentialPersistenceForSession];
