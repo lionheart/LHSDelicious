@@ -10,6 +10,7 @@
 #import "NSString+URLEncoding.h"
 #import <XMLDictionary/XMLDictionary.h>
 
+
 @implementation LHSDelicious
 
 @synthesize username = _username;
@@ -29,20 +30,19 @@
 }
 
 - (id)init {
-    if (self = [super init]) {
+    if (self = [super initWithBaseURL:[LHSDelicious endpointURL]]) {
         // Initialize request callback blocks
         self.requestStartedCallback = ^{};
         self.requestCompletedCallback = ^{};
+        
+        self.responseSerializer = [AFHTTPResponseSerializer serializer];
+        self.requestSerializer = [AFHTTPRequestSerializer serializer];
         
         // Setup date formatter
         self.dateFormatter = [[NSDateFormatter alloc] init];
         [self.dateFormatter setDateFormat:@"yyyy-MM-dd'T'HH:mm:ss'Z'"];
         [self.dateFormatter setTimeZone:[NSTimeZone timeZoneWithAbbreviation:@"UTC"]];
-        
-        // HTTP client
-        self.httpClient = [AFHTTPClient clientWithBaseURL:[LHSDelicious endpointURL]];
-        //[self.httpClient registerHTTPOperationClass:[AFXMLRequestOperation class]];
-        
+
         // XML parser settings
         [[XMLDictionaryParser sharedInstance] setAlwaysUseArrays:YES];
         [[XMLDictionaryParser sharedInstance] setAttributesMode:XMLDictionaryAttributesModeUnprefixed];
@@ -51,7 +51,10 @@
 }
 
 #pragma mark Request wrappers
-- (void)requestPath:(NSString *)path parameters:(NSDictionary *)parameters success:(LHSDeliciousGenericBlock)success failure:(LHSDeliciousErrorBlock)failure {
+- (void)requestPath:(NSString *)path
+         parameters:(NSDictionary *)parameters
+            success:(LHSDeliciousGenericBlock)success
+            failure:(LHSDeliciousErrorBlock)failure {
     
     // Initiate the request started callback
     self.requestStartedCallback();
@@ -65,35 +68,25 @@
     }];
     
     if (!failure) failure = ^(NSError *error) {};
-    
-    // Construct the query string and URL
-    NSString *queryString = [queryComponents componentsJoinedByString:@"&"];
-    NSString *urlString = [NSString stringWithFormat:@"%@%@?%@", DeliciousEndpoint, path, queryString];
-    NSURL *url = [NSURL URLWithString:urlString];
-    
+
+    NSLog(@"%@", self.username);
+    NSLog(@"%@", self.password);
+
+    self.credential = [NSURLCredential credentialWithUser:self.username
+                                                 password:self.password
+                                              persistence:NSURLCredentialPersistenceForSession];
     // Create the request
-    NSMutableURLRequest *request = [self.httpClient requestWithMethod:@"GET" path:[url absoluteString] parameters:nil];
-    AFHTTPRequestOperation *operation = [[AFHTTPRequestOperation alloc] initWithRequest:request];
-    
-    // Setup HTTP authentication
-    [operation setWillSendRequestForAuthenticationChallengeBlock:^(NSURLConnection *connection, NSURLAuthenticationChallenge *challenge) {
-        NSURLCredential *credential = [NSURLCredential credentialWithUser:self.username password:self.password persistence:NSURLCredentialPersistenceForSession];
-        [[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
-    }];
-    
-    // Set the completion blocks
-    [operation setCompletionBlockWithSuccess:^(AFHTTPRequestOperation *operation, id responseObject) {
-        success(responseObject);
-        self.requestCompletedCallback();
-    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        // TODO: Parse other errors here
-        failure([NSError errorWithDomain:LHSDeliciousErrorDomain code:LHSDeliciousErrorEmptyResponse userInfo:nil]);
-        self.requestCompletedCallback();
-    }];
-    
-    // Start the request
-    [operation start];
-    
+    [self GET:path
+   parameters:parameters
+      success:^(AFHTTPRequestOperation *task, id response) {
+          success(response);
+          self.requestCompletedCallback();
+      }
+      failure:^(AFHTTPRequestOperation *task, NSError *error) {
+          // TODO: Parse other errors here
+          failure([NSError errorWithDomain:LHSDeliciousErrorDomain code:LHSDeliciousErrorEmptyResponse userInfo:nil]);
+          self.requestCompletedCallback();
+      }];
 }
 
 - (void)requestPath:(NSString *)path success:(LHSDeliciousGenericBlock)success failure:(LHSDeliciousErrorBlock)failure {

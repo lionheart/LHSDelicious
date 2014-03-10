@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <AFNetworking/AFNetworking.h>
+#import <AFNetworking/AFHTTPRequestOperationManager.h>
 
 static NSString *DeliciousEndpoint __unused = @"https://api.delicious.com/v1/";
 static NSString *LHSDeliciousErrorDomain __unused = @"LHDelicousErrorDomain";
@@ -28,13 +28,12 @@ typedef void(^LHSDeliciousDictionaryBlock)();
 typedef void(^LHSDeliciousSuccessBlock)(NSArray *, NSDictionary *);
 typedef void(^LHSDeliciousErrorBlock)(NSError *);
 
-@interface LHSDelicious : NSObject <NSURLConnectionDataDelegate, NSURLConnectionDelegate>
+@interface LHSDelicious : AFHTTPRequestOperationManager <NSURLConnectionDataDelegate, NSURLConnectionDelegate>
 
 @property (nonatomic, retain) NSString *username;
 @property (nonatomic, retain) NSString *password;
 @property (nonatomic, retain) NSDateFormatter *dateFormatter;
 @property (nonatomic, retain) NSTimer *throttleTimer;
-@property (nonatomic, retain) AFHTTPClient *httpClient;
 
 @property (nonatomic, copy) void (^requestStartedCallback)();
 @property (nonatomic, copy) void (^requestCompletedCallback)();
