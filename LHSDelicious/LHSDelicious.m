@@ -175,7 +175,10 @@
 - (void)addBookmark:(NSDictionary *)bookmark
             success:(void (^)())success
             failure:(void (^)(NSError *))failure {
-    [self requestPath:@"posts/add" parameters:bookmark success:^(id response) {
+    NSMutableDictionary *parameters = [bookmark mutableCopy];
+    parameters[@"replace"] = @"yes";
+
+    [self requestPath:@"posts/add" parameters:parameters success:^(id response) {
         success();
     } failure:failure];
 }
