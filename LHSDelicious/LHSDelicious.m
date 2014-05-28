@@ -142,6 +142,7 @@
 // Get all posts
 - (void)bookmarksWithSuccess:(LHSDeliciousSuccessBlock)success failure:(LHSDeliciousErrorBlock)failure {
     [self bookmarksWithTag:nil offset:-1 count:-1 fromDate:nil toDate:nil includeMeta:YES success:success failure:failure];
+
 }
 
 // Get posts with optional tag filter, offset, result count, date range, and meta data
@@ -153,7 +154,6 @@
              includeMeta:(BOOL)includeMeta
                  success:(LHSDeliciousSuccessBlock)success
                  failure:(LHSDeliciousErrorBlock)failure {
-    
     // Build our paramters
     NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
     if (tag) parameters[@"tag"] = tag;
