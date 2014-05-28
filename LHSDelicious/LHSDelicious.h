@@ -26,7 +26,11 @@ typedef void(^LHSDeliciousDateBlock)(NSDate *);
 typedef void(^LHSDeliciousEmptyBlock)();
 typedef void(^LHSDeliciousDictionaryBlock)();
 typedef void(^LHSDeliciousSuccessBlock)(NSArray *, NSDictionary *);
-typedef void(^LHSDeliciousErrorBlock)(NSError *);
+typedef void(^LHSDeliciousErrorBlock)(NSError *error);
+
+typedef void(^LHSDeliciousArrayDictionaryErrorBlock)(NSArray *bookmarks, NSDictionary * NSError *error);
+typedef void(^LHSDeliciousDictionaryErrorBlock)(NSDictionary *bookmark, NSError *error);
+typedef void(^LHSDeliciousDateErrorBlock)(NSDate *date, NSError *error);
 
 @interface LHSDelicious : AFHTTPRequestOperationManager <NSURLConnectionDataDelegate, NSURLConnectionDelegate>
 
@@ -57,14 +61,12 @@ typedef void(^LHSDeliciousErrorBlock)(NSError *);
  *  @param username Delicious username
  *  @param password Delicious password
  *  @param timeout  Timeout in seconds
- *  @param success  The block to be executed on the completion of a successful authentication request. The block has no return value and takes one argument: the username originally passed into the method.
- *  @param failure  The block to be executed on the completion of a failed authentication request. The block has no return value and takes one argument: the error that occurred during the request.
+ *  @param completion  The block to be executed on the completion of an authentication request. The block has no return value and takes one argument: the error (if any) that occurred during the request.
  */
 - (void)authenticateWithUsername:(NSString *)username
                         password:(NSString *)password
                          timeout:(NSTimeInterval)timeout
-                         success:(LHSDeliciousStringBlock)success
-                         failure:(LHSDeliciousErrorBlock)failure;
+                      completion:(LHSDeliciousErrorBlock)completion;
 
 /**
  *  Authenticate a user by providing a username and password.
@@ -72,13 +74,11 @@ typedef void(^LHSDeliciousErrorBlock)(NSError *);
  *  @param username Delicious username
  *  @param password Delicious password
  *  @param timeout  Timeout in seconds
- *  @param success  The block to be executed on the completion of a successful authentication request. The block has no return value and takes one argument: the username originally passed into the method.
- *  @param failure  The block to be executed on the completion of a failed authentication request. The block has no return value and takes one argument: the error that occurred during the request.
+ *  @param completion  The block to be executed on the completion of an authentication request. The block has no return value and takes one argument: the error (if any) that occurred during the request.
  */
 - (void)authenticateWithUsername:(NSString *)username
                         password:(NSString *)password
-                         success:(LHSDeliciousStringBlock)success
-                         failure:(LHSDeliciousErrorBlock)failure;
+                      completion:(LHSDeliciousErrorBlock)completion
 
 - (void)resetAuthentication;
 
@@ -91,10 +91,9 @@ typedef void(^LHSDeliciousErrorBlock)(NSError *);
 /**
  *  Retrieve the time bookmarks were last updated on the server.
  *
- *  @param success A block object to be executed when the request finishes successfully. This block has no return value and takes one argument: a date representing the time that bookmarks were last updated on the server.
- *  @param failure A block object to be executed when the task finishes unsuccessfully, or that finishes successfully, but encountered an error while parsing the response data. This block has no return value and takes one argument: an error describing the network or parsing error that occurred.
+ *  @param completion  The block to be executed on the completion of an authentication request. The block has no return value and takes two arguments: a date representing the time that bookmarks were last updated on the server and the error (if any) that occurred during the request.
  */
-- (void)lastUpdateWithSuccess:(LHSDeliciousDateBlock)success failure:(LHSDeliciousErrorBlock)failure;
+- (void)lastUpdateWithCompletion:(LHSDeliciousDateErrorBlock)completion;
 
 #pragma mark Bookmarks
 
@@ -103,10 +102,9 @@ typedef void(^LHSDeliciousErrorBlock)(NSError *);
 /**
  *  Retrieve up to 100,000 bookmarks with no filters. Calls bookmarksWithTag:offset:count:fromDate:toDate:includeMeta:success:failure:.
  *
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes one argument: an array containing dictionary objects for each bookmark retrieved.
- *  @param failure A block object to be executed when the request finishes unsuccessfully. This block has no return value and takes one argument: the error that occurred during the request.
+ *  @param completion  The block to be executed on the completion of an authentication request. The block has no return value and takes two arguments: an array containing dictionary objects for each bookmark retrieved and the error (if any) that occurred during the request.
  */
-- (void)bookmarksWithSuccess:(LHSDeliciousSuccessBlock)success failure:(LHSDeliciousErrorBlock)failure;
+- (void)bookmarksWithCompletion:(LHSDeliciousArrayDictionaryErrorBlock)completion;
 
 /**
  *  Retrieve bookmarks using Delicious filters.
@@ -117,8 +115,7 @@ typedef void(^LHSDeliciousErrorBlock)(NSError *);
  *  @param fromDate    A date object describing the earliest date from which to retrieve bookmarks.
  *  @param toDate      A date object describing the latest date from which to retrieve bookmarks.
  *  @param includeMeta Include a change detection value in the bookmark response.
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes one argument: an array containing dictionary objects for each bookmark retrieved.
- *  @param failure A block object to be executed when the request finishes unsuccessfully. This block has no return value and takes one argument: the error that occurred during the request.
+ *  @param completion  The block to be executed on the completion of an authentication request. The block has no return value and takes two arguments: an array containing dictionary objects for each bookmark retrieved and the error (if any) that occurred during the request.
  */
 
 - (void)bookmarksWithTag:(NSString *)tag
@@ -127,19 +124,16 @@ typedef void(^LHSDeliciousErrorBlock)(NSError *);
                 fromDate:(NSDate *)fromDate
                   toDate:(NSDate *)toDate
              includeMeta:(BOOL)includeMeta
-                 success:(LHSDeliciousSuccessBlock)success
-                 failure:(LHSDeliciousErrorBlock)failure;
+              completion:(LHSDeliciousArrayDictionaryErrorBlock)completion;
 
 /**
  *  Add a bookmark.
  *
  *  @param bookmark A dictionary object containing keys for 'url', 'title', 'description', 'shared', and 'tags'.
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes no arguments.
- *  @param failure A block object to be executed when the request finishes unsuccessfully. This block has no return value and takes one argument: the error that occurred during the request.
+ *  @param completion  The block to be executed on the completion of an authentication request. The block has no return value and takes one argument: the error (if any) that occurred during the request.
  */
 - (void)addBookmark:(NSDictionary *)bookmark
-            success:(void (^)())success
-            failure:(void (^)(NSError *))failure;
+         completion:(LHSDeliciousErrorBlock)completion;
 
 /**
  *  Add a bookmark.
@@ -149,34 +143,33 @@ typedef void(^LHSDeliciousErrorBlock)(NSError *);
  *  @param description Optional. The bookmark's description. Corresponds to the "extended" field in the Delicious API.
  *  @param tags        Optional. Comma-separated tags for the bookmark.
  *  @param shared      Optional. Defaults to YES. If no, make the bookmark private.
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes no arguments.
- *  @param failure A block object to be executed when the request finishes unsuccessfully. This block has no return value and takes one argument: the error that occurred during the request.
+ *  @param completion  The block to be executed on the completion of an authentication request. The block has no return value and takes one argument: the error (if any) that occurred during the request.
  */
 - (void)addBookmarkWithURL:(NSString *)url
                      title:(NSString *)title
                description:(NSString *)description
                       tags:(NSString *)tags
                     shared:(BOOL)shared
-                   success:(LHSDeliciousEmptyBlock)success
-                   failure:(LHSDeliciousErrorBlock)failure;
+                completion:(LHSDeliciousErrorBlock)completion;
 
 /**
  *  Retrieve a single bookmark.
  *
  *  @param url     The URL for the bookmark to retrieve.
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes one argument: a dictionary describing the bookmark object that was retrieved.
- *  @param failure A block object to be executed when the request finishes unsuccessfully. This block has no return value and takes one argument: the error that occurred during the request.
+ *  @param completion  The block to be executed on the completion of an authentication request. The block has no return value and takes two arguments: a dictionary describing the bookmark object that was retrieved and the error (if any) that occurred during the request.
  */
-- (void)bookmarkWithURL:(NSString *)url success:(LHSDeliciousDictionaryBlock)success failure:(LHSDeliciousErrorBlock)failure;
+
+- (void)bookmarkWithURL:(NSString *)url
+             completion:(LHSDeliciousDictionaryErrorBlock)completion;
 
 /**
  *  Delete a bookmark.
  *
  *  @param url     The URL for the bookmark to delete.
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes no arguments.
- *  @param failure A block object to be executed when the request finishes unsuccessfully. This block has no return value and takes one argument: the error that occurred during the request.
+ *  @param completion  The block to be executed on the completion of an authentication request. The block has no return value and takes one argument: the error (if any) that occurred during the request.
  */
-- (void)deleteBookmarkWithURL:(NSString *)url success:(LHSDeliciousEmptyBlock)success failure:(LHSDeliciousErrorBlock)failure;
+- (void)deleteBookmarkWithURL:(NSString *)url
+                   completion:(LHSDeliciousErrorBlock)completion;
 
 #pragma mark Tags
 
@@ -185,26 +178,28 @@ typedef void(^LHSDeliciousErrorBlock)(NSError *);
 /**
  *  Retrieve all tags.
  *
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes one argument: a dictionary with tag names as keys and frequencies as values.
+ *  @param completion A block object to be executed when the request completes successfully. This block has no return value and takes one argument: a dictionary with tag names as keys and frequencies as values.
  */
-- (void)tagsWithSuccess:(LHSDeliciousDictionaryBlock)success;
+- (void)tagsWithCompletion:(LHSDeliciousDictionaryBlock)completion;
 
 /**
  *  Delete a tag.
  *
  *  @param tag     The name of the tag to delete.
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes no arguments.
+ *  @param completion A block object to be executed when the request completes successfully. This block has no return value and takes no arguments.
  */
-- (void)deleteTag:(NSString *)tag success:(LHSDeliciousEmptyBlock)success;
+- (void)deleteTag:(NSString *)tag completion:(LHSDeliciousEmptyBlock)completion;
 
 /**
  *  Rename a tag.
  *
  *  @param oldTag  The current name of the tag.
  *  @param newTag  The updated name of the tag.
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes no arguments.
+ *  @param completion A block object to be executed when the request completes successfully. This block has no return value and takes no arguments.
  */
-- (void)renameTagFrom:(NSString *)oldTag to:(NSString *)newTag success:(LHSDeliciousEmptyBlock)success;
+- (void)renameTagFrom:(NSString *)oldTag
+                   to:(NSString *)newTag
+           completion:(LHSDeliciousEmptyBlock)completion;
 
 #pragma mark Tag bundles
 
@@ -213,25 +208,28 @@ typedef void(^LHSDeliciousErrorBlock)(NSError *);
 /**
  *  Retrieve all tag bundles.
  *
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes one argument: a dictionary with the names of the tag bundles as keys and consituent tags as values.
+ *  @param completion A block object to be executed when the request completes successfully. This block has no return value and takes one argument: a dictionary with the names of the tag bundles as keys and consituent tags as values.
  */
-- (void)tagBundlesWithSuccess:(LHSDeliciousDictionaryBlock)success;
+- (void)tagBundlesWithCompletion:(LHSDeliciousDictionaryBlock)completion;
 
 /**
  *  Update the tags included in a tag bundle.
  *
  *  @param bundle  The name of the tag bundle to update.
  *  @param tags    The new list of tags to include in the tag bundle.
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes no arguments.
+ *  @param completion A block object to be executed when the request completes successfully. This block has no return value and takes no arguments.
  */
-- (void)updateTagBundle:(NSString *)bundle withTags:(NSString *)tags success:(LHSDeliciousEmptyBlock)success;
+- (void)updateTagBundle:(NSString *)bundle
+               withTags:(NSString *)tags
+             completion:(LHSDeliciousEmptyBlock)completion;
 
 /**
  *  Delete a tag bundle.
  *
  *  @param bundle  The name of the tag bundle to delete.
- *  @param success A block object to be executed when the request completes successfully. This block has no return value and takes no arguments.
+ *  @param completion A block object to be executed when the request completes successfully. This block has no return value and takes no arguments.
  */
-- (void)deleteTagBundle:(NSString *)bundle success:(LHSDeliciousEmptyBlock)success;
+- (void)deleteTagBundle:(NSString *)bundle
+             completion:(LHSDeliciousEmptyBlock)completion;
 
 @end
