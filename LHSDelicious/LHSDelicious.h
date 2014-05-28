@@ -28,7 +28,7 @@ typedef void(^LHSDeliciousDictionaryBlock)();
 typedef void(^LHSDeliciousSuccessBlock)(NSArray *, NSDictionary *);
 typedef void(^LHSDeliciousErrorBlock)(NSError *error);
 
-typedef void(^LHSDeliciousArrayDictionaryErrorBlock)(NSArray *bookmarks, NSDictionary * NSError *error);
+typedef void(^LHSDeliciousArrayErrorBlock)(NSArray *bookmarks, NSError *error);
 typedef void(^LHSDeliciousDictionaryErrorBlock)(NSDictionary *bookmark, NSError *error);
 typedef void(^LHSDeliciousDateErrorBlock)(NSDate *date, NSError *error);
 
@@ -104,7 +104,7 @@ typedef void(^LHSDeliciousDateErrorBlock)(NSDate *date, NSError *error);
  *
  *  @param completion  The block to be executed on the completion of an authentication request. The block has no return value and takes two arguments: an array containing dictionary objects for each bookmark retrieved and the error (if any) that occurred during the request.
  */
-- (void)bookmarksWithCompletion:(LHSDeliciousArrayDictionaryErrorBlock)completion;
+- (void)bookmarksWithCompletion:(LHSDeliciousArrayErrorBlock)completion;
 
 /**
  *  Retrieve bookmarks using Delicious filters.
@@ -124,7 +124,7 @@ typedef void(^LHSDeliciousDateErrorBlock)(NSDate *date, NSError *error);
                 fromDate:(NSDate *)fromDate
                   toDate:(NSDate *)toDate
              includeMeta:(BOOL)includeMeta
-              completion:(LHSDeliciousArrayDictionaryErrorBlock)completion;
+              completion:(LHSDeliciousArrayErrorBlock)completion;
 
 /**
  *  Add a bookmark.

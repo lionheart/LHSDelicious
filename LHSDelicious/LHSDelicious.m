@@ -141,7 +141,7 @@
 
 #pragma mark Bookmarks
 
-- (void)bookmarksWithCompletion:(LHSDeliciousArrayDictionaryErrorBlock)completion {
+- (void)bookmarksWithCompletion:(LHSDeliciousArrayErrorBlock)completion {
     [self bookmarksWithTag:nil
                     offset:-1
                      count:-1
@@ -157,7 +157,7 @@
                 fromDate:(NSDate *)fromDate
                   toDate:(NSDate *)toDate
              includeMeta:(BOOL)includeMeta
-              completion:(LHSDeliciousArrayDictionaryErrorBlock)completion {
+              completion:(LHSDeliciousArrayErrorBlock)completion {
     NSMutableDictionary *parameters = [NSMutableDictionary dictionary];
     if (tag) parameters[@"tag"] = tag;
     if (offset != -1) parameters[@"start"] = [NSString stringWithFormat:@"%ld", (long)offset];
@@ -170,7 +170,7 @@
     [self requestPath:@"posts/all" parameters:parameters success:^(id response) {
         // Parse the XML data
         NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
-        completion([xml arrayValueForKeyPath:@"post"], parameters, nil);
+        completion([xml arrayValueForKeyPath:@"post"], nil);
     } failure:^(NSError *error) {
         completion(nil, nil, error);
     }];
