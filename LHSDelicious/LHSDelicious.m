@@ -105,19 +105,16 @@
     self.password = password;
     
     // Delicious has no specific username check, so we check for a 200 OK on the last update time
-    [self lastUpdateWithSuccess:^(NSDate *lastUpdate) {
-        completion(nil);
-    } failure:^(NSError *error) {
-        completion([NSError errorWithDomain:LHSDeliciousErrorDomain code:LHSDeliciousErrorInvalidCredentials userInfo:nil]);
+    [self lastUpdateWithCompletion:^(NSDate *date, NSError *error) {
+        completion(error);
     }];
 }
 
 - (void)authenticateWithUsername:(NSString *)username
                         password:(NSString *)password
                       completion:(LHSDeliciousErrorBlock)completion {
-    
-    [self authenticateWithUsername:user
-                          password:pass
+    [self authenticateWithUsername:username
+                          password:password
                            timeout:30
                         completion:completion];
 }
@@ -172,7 +169,7 @@
         NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
         completion([xml arrayValueForKeyPath:@"post"], nil);
     } failure:^(NSError *error) {
-        completion(nil, nil, error);
+        completion(nil, error);
     }];
 }
 
