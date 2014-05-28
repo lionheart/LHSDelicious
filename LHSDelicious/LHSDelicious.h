@@ -78,7 +78,7 @@ typedef void(^LHSDeliciousDateErrorBlock)(NSDate *date, NSError *error);
  */
 - (void)authenticateWithUsername:(NSString *)username
                         password:(NSString *)password
-                      completion:(LHSDeliciousErrorBlock)completion
+                      completion:(LHSDeliciousErrorBlock)completion;
 
 - (void)resetAuthentication;
 
