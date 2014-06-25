@@ -203,11 +203,11 @@
 
 - (void)bookmarkWithURL:(NSString *)url completion:(LHSDeliciousDictionaryErrorBlock)completion {
     [self requestPath:@"posts/get" parameters:@{@"url": url} success:^(id response) {
-        if ([response[@"posts"] count] == 0) {
+        NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
+        if ([xml[@"post"] count] == 0) {
             completion(nil, [NSError errorWithDomain:LHSDeliciousErrorDomain code:LHSDeliciousErrorBookmarkNotFound userInfo:nil]);
         }
         else {
-            NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
             completion([xml arrayValueForKeyPath:@"post"][0], nil);
         }
     } failure:^(NSError *error) {
