@@ -81,7 +81,14 @@
       }
       failure:^(AFHTTPRequestOperation *task, NSError *error) {
           // TODO: Parse other errors here
-          failure([NSError errorWithDomain:LHSDeliciousErrorDomain code:LHSDeliciousErrorEmptyResponse userInfo:nil]);
+          NSUInteger code;
+          if (task.response.statusCode == 401) {
+              code = LHSDeliciousErrorInvalidCredentials;
+          }
+          else {
+              code = LHSDeliciousErrorEmptyResponse;
+          }
+          failure([NSError errorWithDomain:LHSDeliciousErrorDomain code:code userInfo:error.userInfo]);
           self.requestCompletedCallback();
       }];
 }
@@ -130,7 +137,8 @@
 
 - (void)lastUpdateWithCompletion:(LHSDeliciousDateErrorBlock)completion {
     [self requestPath:@"posts/update" success:^(id response) {
-        completion([NSDate date], nil);
+        NSDictionary *xml = [NSDictionary dictionaryWithXMLData:(NSData *)response];
+        completion([self.dateFormatter dateFromString:xml[@"time"]], nil);
     } failure:^(NSError *error) {
         completion(nil, error);
     }];
